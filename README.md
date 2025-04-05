@@ -1,15 +1,17 @@
 # Sistema de Gestión de Contactos
 
-Esta aplicación permite gestionar contactos personales, con funcionalidades para registrar, visualizar y exportar contactos en formato vCard.
+Esta aplicación permite gestionar contactos personales, con funcionalidades para registrar, visualizar, editar, importar y exportar contactos.
 
 ## Características
 
 - Registro de datos completos de contacto (nombre, apellidos, correo, celular, fecha de nacimiento, género, dirección)
-- Visualización de contactos en una tabla ordenada
+- Visualización de contactos con cálculo automático de edad
+- Edición de contactos existentes
+- Importación de contactos desde archivos Excel (.xls, .xlsx) o CSV (.csv)
 - Exportación individual o masiva en formato vCard
-- Interfaz responsiva y amigable
+- Interfaz responsiva y amigable con Bootstrap 5
 - API RESTful con FastAPI
-- Validación de datos en ambos, frontend y backend
+- Validación de datos en frontend y backend
 
 ## Estructura del proyecto
 
@@ -67,7 +69,32 @@ sistema-gestion-contactos/
 
 Simplemente abre el archivo `frontend/index.html` en tu navegador web.
 
-Si estás ejecutando todo en máquina local, no deberías tener problemas con CORS. Para un entorno de producción, considera configurar correctamente las políticas de CORS en el backend.
+## Funcionalidades
+
+### 1. Registro de contactos
+- Formulario completo con validación
+- Todos los campos son obligatorios
+- El botón "Registrar Contacto" envía los datos a la API
+
+### 2. Visualización de contactos
+- Tabla con todos los contactos registrados
+- Muestra la edad calculada automáticamente a partir de la fecha de nacimiento
+- Botones para editar, exportar como vCard o eliminar cada contacto
+
+### 3. Edición de contactos
+- Modificación de cualquier dato del contacto
+- Modal con formulario precargado con los datos actuales
+- Validación de campos antes de guardar cambios
+
+### 4. Importación de contactos
+- Importación desde archivos Excel (.xls, .xlsx) o CSV (.csv)
+- Validación de estructura de columnas
+- Plantilla descargable para facilitar la creación de archivos compatibles
+
+### 5. Exportación de contactos
+- Exportación individual como vCard
+- Exportación de todos los contactos como vCard
+- El formato vCard es compatible con la mayoría de aplicaciones de contactos
 
 ## Documentación de la API
 
@@ -79,51 +106,46 @@ La API está documentada automáticamente gracias a FastAPI:
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
-| GET | `/contacts/` | Obtener todos los contactos |
+| GET | `/contacts/` | Obtener todos los contactos con edad calculada |
 | POST | `/contacts/` | Crear un nuevo contacto |
 | GET | `/contacts/{contact_id}` | Obtener un contacto específico |
+| PUT | `/contacts/{contact_id}` | Actualizar un contacto existente |
 | DELETE | `/contacts/{contact_id}` | Eliminar un contacto |
 | GET | `/contacts/{contact_id}/vcard` | Obtener vCard de un contacto específico |
 | GET | `/export/vcard` | Exportar todos los contactos en formato vCard |
+| POST | `/import/excel` | Importar contactos desde Excel o CSV |
 
-## Uso de la aplicación
+## Solución de problemas comunes
 
-### Registrar un contacto
+### Problemas de CORS
+Si encuentras errores de CORS, asegúrate de que el backend esté configurado correctamente para permitir solicitudes del origen del frontend. La configuración actual permite solicitudes de cualquier origen para facilitar el desarrollo.
 
-1. Completa todos los campos del formulario
-2. Haz clic en "Registrar Contacto"
-3. Verás una notificación de éxito y serás redirigido a la lista de contactos
+### Errores de importación
+- Asegúrate de que tu archivo Excel o CSV tenga encabezados exactamente iguales a: `nombre`, `apellidos`, `correo`, `celular`, `fecha_nacimiento`, `genero`, `direccion`
+- La función de importación intenta manejar diferentes formatos de fecha, pero es recomendable usar el formato ISO (YYYY-MM-DD)
+- Si tienes problemas, usa la plantilla descargable como base
 
-### Ver contactos
+### Problemas con dependencias
+Si encuentras errores relacionados con las bibliotecas Python, asegúrate de instalar exactamente las versiones especificadas en `requirements.txt`:
+```bash
+pip install -r requirements.txt --no-cache-dir
+```
 
-1. Haz clic en la pestaña "Ver Contactos"
-2. Se mostrará una tabla con todos los contactos registrados
+## Extensiones y personalizaciones
 
-### Exportar contactos
+### Cambiar el almacenamiento de datos
+Por defecto, la aplicación utiliza un archivo JSON como base de datos. Para entornos de producción, considera implementar una base de datos relacional:
 
-- Para exportar un contacto individual, haz clic en el botón "vCard" en la fila correspondiente
-- Para exportar todos los contactos, haz clic en "Exportar todos como vCard"
+1. Añade SQLAlchemy a `requirements.txt`
+2. Modifica las funciones de almacenamiento en `main.py`
+3. Crea los modelos de datos correspondientes
 
-### Eliminar un contacto
+### Añadir autenticación
+Para implementar autenticación básica:
 
-1. Haz clic en el botón "Eliminar" en la fila del contacto
-2. Confirma la eliminación en el diálogo que aparece
-
-## Personalización
-
-### Base de datos
-
-Por defecto, la aplicación utiliza un archivo JSON como base de datos. Para entornos de producción, considera implementar una base de datos más robusta como PostgreSQL o MongoDB.
-
-### Interfaz de usuario
-
-La interfaz utiliza Bootstrap 5 y puede personalizarse modificando las clases y estilos en el archivo `index.html`.
-
-## Solución de problemas
-
-- Si encuentras problemas de CORS, asegúrate de que el backend esté configurado correctamente para permitir solicitudes del origen del frontend.
-- Verifica que el servidor esté ejecutándose en el puerto 8000, que es el configurado por defecto en el frontend.
-- Para cualquier error en los formularios, revisa la consola del navegador para obtener más información.
+1. Utiliza FastAPI Security con OAuth2PasswordBearer
+2. Crea un modelo de Usuario y un sistema de registro/login
+3. Protege las rutas sensibles con dependencias de autenticación
 
 ## Contribuir
 
