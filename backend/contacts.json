@@ -2,10 +2,10 @@
   {
     "nombre": "Patrick Benedicto",
     "apellidos": "Correa Dávila",
-    "correo": "patrickcorrea@gmail.com",
+    "correo": "patrickcorreadavila@gmail.com",
     "celular": "975561457",
     "fecha_nacimiento": "2006-03-17",
-    "genero": "masculino",
+    "genero": "Masculino",
     "direccion": "Calle Angel Brusco 671 - 669",
     "id": "5f41e05d-5bff-45ef-9841-a24cbee334a9",
     "fecha_registro": "2025-04-05 10:44:14.149224"
@@ -31,5 +31,27 @@
     "direccion": "AA. HH. Ampliación Jorge Monasi Calle 15 de Agosto Mz. B Lt. 4",
     "id": "3992fe0f-f861-4444-8b50-dc577b0b3ed4",
     "fecha_registro": "2025-04-05 11:56:08.908400"
+  },
+  {
+    "nombre": "Juan André",
+    "apellidos": "Lavado Perez",
+    "correo": "jlavado@gmail.com",
+    "celular": "987456321",
+    "fecha_nacimiento": "1992-01-11",
+    "genero": "Masculino",
+    "direccion": "Calle Las Begonias 135",
+    "id": "79a9c6a9-2a1f-478d-9633-3d0ce1801428",
+    "fecha_registro": "2025-04-05T12:48:16.209660"
+  },
+  {
+    "nombre": "Luis Gabriel",
+    "apellidos": "Alvarado Perea",
+    "correo": "luchoperea@gmail.com",
+    "celular": "987456258",
+    "fecha_nacimiento": "1978-05-15",
+    "genero": "Masculino",
+    "direccion": "Psaje Dulce Maria Mz. B Lt. 5",
+    "id": "5061c4c3-6824-4996-a4c4-be5cbdc8dc2c",
+    "fecha_registro": "2025-04-05T12:50:48.751285"
   }
 ]

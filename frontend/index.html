@@ -42,8 +42,6 @@
     </style>
 </head>
 <body>
-    
-
     <div class="container mt-4">
         <h1 class="text-center mb-4">Sistema de Gestión de Contactos</h1>
         
@@ -53,6 +51,9 @@
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="contacts-tab" data-bs-toggle="tab" data-bs-target="#contacts" type="button" role="tab" aria-controls="contacts" aria-selected="false">Ver Contactos</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="import-tab" data-bs-toggle="tab" data-bs-target="#import" type="button" role="tab" aria-controls="import" aria-selected="false">Importar Contactos</button>
             </li>
         </ul>
         
@@ -148,7 +149,7 @@
                                 <th>Apellidos</th>
                                 <th>Correo</th>
                                 <th>Celular</th>
-                                <th>Fecha Nacimiento</th>
+                                <th>Edad</th>
                                 <th>Género</th>
                                 <th>Dirección</th>
                                 <th>Acciones</th>
@@ -162,6 +163,125 @@
                 
                 <div id="noContacts" class="alert alert-info text-center" style="display: none;">
                     No hay contactos registrados aún.
+                </div>
+            </div>
+            
+            <!-- Importar Contactos -->
+            <div class="tab-pane fade" id="import" role="tabpanel" aria-labelledby="import-tab">
+                <div class="form-container">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title">Importar Contactos desde Excel</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="importForm" class="needs-validation" novalidate>
+                                <div class="mb-3">
+                                    <label for="excelFile" class="form-label">Archivo de Contactos (.xls, .xlsx, .csv)</label>
+                                    <input class="form-control" type="file" id="excelFile" accept=".xls,.xlsx,.csv" required>
+                                    <div class="invalid-feedback">
+                                        Por favor selecciona un archivo Excel o CSV.
+                                    </div>
+                                    <div class="form-text">
+                                        El archivo debe contener las columnas: nombre, apellidos, correo, celular, fecha_nacimiento, genero, direccion
+                                    </div>
+                                </div>
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-primary" id="importBtn">Importar Contactos</button>
+                                </div>
+                            </form>
+                            
+                            <div class="mt-4">
+                                <h6>Plantilla de Excel</h6>
+                                <p>Descarga una plantilla para importar contactos:</p>
+                                <button class="btn btn-outline-primary" id="downloadTemplateBtn">Descargar Plantilla</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para editar contacto -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">Editar Contacto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editForm" class="needs-validation" novalidate>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="edit_nombre" class="form-label">Nombre*</label>
+                                <input type="text" class="form-control" id="edit_nombre" name="nombre" required>
+                                <div class="invalid-feedback">
+                                    Por favor ingresa un nombre.
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="edit_apellidos" class="form-label">Apellidos*</label>
+                                <input type="text" class="form-control" id="edit_apellidos" name="apellidos" required>
+                                <div class="invalid-feedback">
+                                    Por favor ingresa los apellidos.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="edit_correo" class="form-label">Correo Electrónico*</label>
+                                <input type="email" class="form-control" id="edit_correo" name="correo" required>
+                                <div class="invalid-feedback">
+                                    Por favor ingresa un correo electrónico válido.
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="edit_celular" class="form-label">Número de Celular*</label>
+                                <input type="tel" class="form-control" id="edit_celular" name="celular" required>
+                                <div class="invalid-feedback">
+                                    Por favor ingresa un número de celular.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="edit_fecha_nacimiento" class="form-label">Fecha de Nacimiento*</label>
+                                <input type="date" class="form-control" id="edit_fecha_nacimiento" name="fecha_nacimiento" required>
+                                <div class="invalid-feedback">
+                                    Por favor selecciona una fecha de nacimiento.
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="edit_genero" class="form-label">Género*</label>
+                                <select class="form-select" id="edit_genero" name="genero" required>
+                                    <option value="" disabled>Selecciona una opción</option>
+                                    <option value="Masculino">Masculino</option>
+                                    <option value="Femenino">Femenino</option>
+                                    <option value="No binario">No binario</option>
+                                    <option value="Prefiero no decir">Prefiero no decir</option>
+                                </select>
+                                <div class="invalid-feedback">
+                                    Por favor selecciona un género.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="edit_direccion" class="form-label">Dirección*</label>
+                            <textarea class="form-control" id="edit_direccion" name="direccion" rows="3" required></textarea>
+                            <div class="invalid-feedback">
+                                Por favor ingresa una dirección.
+                            </div>
+                        </div>
+                        <input type="hidden" id="edit_contact_id">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="saveEditBtn">Guardar Cambios</button>
                 </div>
             </div>
         </div>
@@ -252,6 +372,179 @@
                 loadingElement.style.display = show ? 'flex' : 'none';
             }
         }
+        
+        // Función para cargar un contacto para edición
+        async function loadContactForEdit(event) {
+            const contactId = event.target.dataset.id;
+            currentContactId = contactId;
+            
+            try {
+                toggleLoading(true);
+                
+                const response = await fetch(`${API_URL}/contacts/${contactId}`);
+                
+                if (!response.ok) {
+                    throw new Error('Error al cargar los datos del contacto');
+                }
+                
+                const contact = await response.json();
+                
+                // Llenar el formulario con los datos del contacto
+                document.getElementById('edit_nombre').value = contact.nombre;
+                document.getElementById('edit_apellidos').value = contact.apellidos;
+                document.getElementById('edit_correo').value = contact.correo;
+                document.getElementById('edit_celular').value = contact.celular;
+                document.getElementById('edit_fecha_nacimiento').value = contact.fecha_nacimiento;
+                document.getElementById('edit_genero').value = contact.genero;
+                document.getElementById('edit_direccion').value = contact.direccion;
+                document.getElementById('edit_contact_id').value = contact.id;
+                
+                // Mostrar el modal de edición
+                const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+                editModal.show();
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Error', error.message, 'error');
+            } finally {
+                toggleLoading(false);
+            }
+        }
+        
+        // Función para guardar los cambios de un contacto
+        async function saveContactChanges() {
+            const editForm = document.getElementById('editForm');
+            
+            // Validación del formulario
+            if (!editForm.checkValidity()) {
+                editForm.classList.add('was-validated');
+                return;
+            }
+            
+            const contactId = document.getElementById('edit_contact_id').value;
+            
+            const contactData = {
+                nombre: document.getElementById('edit_nombre').value,
+                apellidos: document.getElementById('edit_apellidos').value,
+                correo: document.getElementById('edit_correo').value,
+                celular: document.getElementById('edit_celular').value,
+                fecha_nacimiento: document.getElementById('edit_fecha_nacimiento').value,
+                genero: document.getElementById('edit_genero').value,
+                direccion: document.getElementById('edit_direccion').value
+            };
+            
+            try {
+                toggleLoading(true);
+                
+                const response = await fetch(`${API_URL}/contacts/${contactId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(contactData)
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Error al actualizar el contacto');
+                }
+                
+                // Cerrar el modal
+                const editModal = bootstrap.Modal.getInstance(document.getElementById('editModal'));
+                editModal.hide();
+                
+                showNotification('Éxito', 'Contacto actualizado correctamente');
+                
+                // Actualizar la lista de contactos
+                await loadContacts();
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Error', error.message, 'error');
+            } finally {
+                toggleLoading(false);
+            }
+        }
+        
+        // Función para importar contactos desde Excel
+        async function importContacts(event) {
+            event.preventDefault();
+            
+            const importForm = document.getElementById('importForm');
+            
+            // Validación del formulario
+            if (!importForm.checkValidity()) {
+                importForm.classList.add('was-validated');
+                return;
+            }
+            
+            const fileInput = document.getElementById('excelFile');
+            
+            if (!fileInput.files || fileInput.files.length === 0) {
+                showNotification('Error', 'Por favor selecciona un archivo Excel', 'error');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            
+            try {
+                toggleLoading(true);
+                
+                const response = await fetch(`${API_URL}/import/excel`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Error al importar contactos');
+                }
+                
+                const result = await response.json();
+                
+                // Limpiar formulario
+                importForm.reset();
+                importForm.classList.remove('was-validated');
+                
+                showNotification('Éxito', result.message);
+                
+                // Cambiar a la pestaña de contactos y actualizar la lista
+                document.getElementById('contacts-tab').click();
+                await loadContacts();
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Error', error.message, 'error');
+            } finally {
+                toggleLoading(false);
+            }
+        }
+        
+        // Función para descargar plantilla de Excel
+        function downloadExcelTemplate() {
+            // Crear un array con los datos de la plantilla
+            const templateData = [
+                ['nombre', 'apellidos', 'correo', 'celular', 'fecha_nacimiento', 'genero', 'direccion'],
+                ['Juan', 'Pérez', 'juan.perez@ejemplo.com', '1234567890', '1990-01-01', 'Masculino', 'Calle Principal 123']
+            ];
+            
+            // Crear un CSV con los datos
+            let csvContent = '';
+            templateData.forEach(row => {
+                csvContent += row.join(',') + '\n';
+            });
+            
+            // Crear un Blob y descargar
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'plantilla_contactos.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
 
         // Función para cargar los contactos
         async function loadContacts() {
@@ -289,10 +582,6 @@
                     contacts.forEach(contact => {
                         const row = document.createElement('tr');
                         
-                        // Formatear fecha de nacimiento
-                        const fechaNacimiento = new Date(contact.fecha_nacimiento);
-                        const fechaFormateada = fechaNacimiento.toLocaleDateString();
-                        
                         // Verificar que la dirección exista antes de mostrarla
                         const direccion = contact.direccion || '';
                         
@@ -301,10 +590,11 @@
                             <td>${contact.apellidos || ''}</td>
                             <td>${contact.correo || ''}</td>
                             <td>${contact.celular || ''}</td>
-                            <td>${fechaFormateada}</td>
+                            <td>${contact.edad} años</td>
                             <td>${contact.genero || ''}</td>
                             <td>${direccion}</td>
                             <td>
+                                <button class="btn btn-sm btn-info edit-btn" data-id="${contact.id}">Editar</button>
                                 <button class="btn btn-sm btn-success export-btn" data-id="${contact.id}">vCard</button>
                                 <button class="btn btn-sm btn-danger delete-btn" data-id="${contact.id}">Eliminar</button>
                             </td>
@@ -320,6 +610,10 @@
                     
                     document.querySelectorAll('.delete-btn').forEach(btn => {
                         btn.addEventListener('click', showDeleteConfirmation);
+                    });
+                    
+                    document.querySelectorAll('.edit-btn').forEach(btn => {
+                        btn.addEventListener('click', loadContactForEdit);
                     });
                 }
             } catch (error) {
@@ -522,6 +816,24 @@
             // Confirmar eliminación
             if (confirmDeleteBtn) {
                 confirmDeleteBtn.addEventListener('click', deleteContact);
+            }
+            
+            // Guardar cambios en edición
+            const saveEditBtn = document.getElementById('saveEditBtn');
+            if (saveEditBtn) {
+                saveEditBtn.addEventListener('click', saveContactChanges);
+            }
+            
+            // Importar contactos
+            const importForm = document.getElementById('importForm');
+            if (importForm) {
+                importForm.addEventListener('submit', importContacts);
+            }
+            
+            // Descargar plantilla
+            const downloadTemplateBtn = document.getElementById('downloadTemplateBtn');
+            if (downloadTemplateBtn) {
+                downloadTemplateBtn.addEventListener('click', downloadExcelTemplate);
             }
         });
     </script>
