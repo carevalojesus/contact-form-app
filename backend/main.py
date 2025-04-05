@@ -1,3 +1,4 @@
+# main.py
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr, Field
@@ -61,7 +62,6 @@ def save_contacts(contacts):
     with open(DB_FILE, "w", encoding="utf-8") as file:
         json.dump(contacts, file, default=str, ensure_ascii=False, indent=2)
 
-
 # Rutas para la API
 @app.get("/")
 def read_root():
@@ -99,15 +99,63 @@ def get_contact(contact_id: str):
 def delete_contact(contact_id: str):
     contacts = load_contacts()
     initial_length = len(contacts)
-
-    contacts =[contact for contact in contacts if contact["id"] != contact_id]
-
+    
+    contacts = [contact for contact in contacts if contact["id"] != contact_id]
+    
     if len(contacts) == initial_length:
         raise HTTPException(status_code=404, detail="Contacto no encontrado")
+    
     save_contacts(contacts)
     return {"message": "Contacto eliminado correctamente"}
 
+@app.get("/contacts/{contact_id}/vcard")
+def get_contact_vcard(contact_id: str):
+    contacts = load_contacts()
+    
+    for contact in contacts:
+        if contact["id"] == contact_id:
+            # Crear vCard según el estándar
+            vcard = f"""BEGIN:VCARD
+VERSION:3.0
+N:{contact['apellidos']};{contact['nombre']};;;
+FN:{contact['nombre']} {contact['apellidos']}
+TEL;TYPE=CELL:{contact['celular']}
+EMAIL:{contact['correo']}
+BDAY:{contact['fecha_nacimiento']}
+GENDER:{contact['genero']}
+ADR:;;{contact['direccion']};;;
+END:VCARD
+"""
+            return {"vcard": vcard}
+    
+    raise HTTPException(status_code=404, detail="Contacto no encontrado")
 
+@app.get("/export/vcard")
+def export_all_vcards():
+    contacts = load_contacts()
+    
+    if not contacts:
+        raise HTTPException(status_code=404, detail="No hay contactos para exportar")
+    
+    all_vcards = ""
+    
+    for contact in contacts:
+        vcard = f"""BEGIN:VCARD
+VERSION:3.0
+N:{contact['apellidos']};{contact['nombre']};;;
+FN:{contact['nombre']} {contact['apellidos']}
+TEL;TYPE=CELL:{contact['celular']}
+EMAIL:{contact['correo']}
+BDAY:{contact['fecha_nacimiento']}
+GENDER:{contact['genero']}
+ADR:;;{contact['direccion']};;;
+END:VCARD
+"""
+        all_vcards += vcard + "\n"
+    
+    return {"vcard": all_vcards}
+
+# Ejecutar la aplicación con Uvicorn
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main.app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

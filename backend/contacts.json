@@ -9,5 +9,38 @@
     "direccion": "Calle Angel Brusco 671 - 669",
     "id": "5f41e05d-5bff-45ef-9841-a24cbee334a9",
     "fecha_registro": "2025-04-05 10:44:14.149224"
+  },
+  {
+    "nombre": "Camilo Estefano",
+    "apellidos": "Morey Valles",
+    "correo": "moreyvalles12@gmail.com",
+    "celular": "914595343",
+    "fecha_nacimiento": "2005-01-25",
+    "genero": "Masculino",
+    "direccion": "Calle Calvo de Araujo 945",
+    "id": "11ceb04b-c3ec-4335-bf04-5d5b26978893",
+    "fecha_registro": "2025-04-05 11:40:36.648415"
+  },
+  {
+    "nombre": "Christian Alfredo",
+    "apellidos": "Arévalo Jesús",
+    "correo": "carevalojesus@gmail.com",
+    "celular": "933240664",
+    "fecha_nacimiento": "1992-12-10",
+    "genero": "Masculino",
+    "direccion": "Calle Nauta 311",
+    "id": "023aa737-b4ad-48a9-b355-6cf0bf62ed74",
+    "fecha_registro": "2025-04-05 11:53:35.151875"
+  },
+  {
+    "nombre": "Milagros de Jesús",
+    "apellidos": "López Lancha",
+    "correo": "milagros005lopez@gmail.com",
+    "celular": "916597348",
+    "fecha_nacimiento": "2005-11-07",
+    "genero": "Femenino",
+    "direccion": "AA. HH. Ampliación Jorge Monasi Calle 15 de Agosto Mz. B Lt. 4",
+    "id": "3992fe0f-f861-4444-8b50-dc577b0b3ed4",
+    "fecha_registro": "2025-04-05 11:56:08.908400"
   }
 ]
