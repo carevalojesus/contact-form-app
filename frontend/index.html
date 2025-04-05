@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de contactos</title>
+    <title>Gestión de Contactos</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .nav-tabs .nav-link.active {
@@ -42,7 +42,7 @@
     </style>
 </head>
 <body>
-   
+    
 
     <div class="container mt-4">
         <h1 class="text-center mb-4">Sistema de Gestión de Contactos</h1>
@@ -196,6 +196,334 @@
             </div>
         </div>
     </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Configuración de la API
+        const API_URL = 'http://127.0.0.1:8000';
+        let currentContactId = null;
+        
+        // Asegurar que inicializamos las variables después de que el DOM esté cargado
+        let contactForm, contactsTableBody, noContactsMessage, refreshBtn, exportAllBtn, deleteModal, confirmDeleteBtn, loadingElement;
+        let toastElement, toast, toastTitle, toastMessage;
+        
+        // Inicializar elementos del DOM
+        function initDOMElements() {
+            contactForm = document.getElementById('contactForm');
+            contactsTableBody = document.getElementById('contactsTableBody');
+            noContactsMessage = document.getElementById('noContacts');
+            refreshBtn = document.getElementById('refreshBtn');
+            exportAllBtn = document.getElementById('exportAllBtn');
+            
+            const deleteModalElement = document.getElementById('deleteModal');
+            if (deleteModalElement) {
+                deleteModal = new bootstrap.Modal(deleteModalElement);
+            }
+            
+            confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+            loadingElement = document.getElementById('loading');
+            
+            // Toast para notificaciones
+            toastElement = document.getElementById('notificationToast');
+            if (toastElement) {
+                toast = new bootstrap.Toast(toastElement);
+            }
+            toastTitle = document.getElementById('toastTitle');
+            toastMessage = document.getElementById('toastMessage');
+        }
+
+        // Función para mostrar notificación
+        function showNotification(title, message, type = 'success') {
+            if (toastTitle && toastMessage && toastElement && toast) {
+                toastTitle.textContent = title;
+                toastMessage.textContent = message;
+                toastElement.className = `toast ${type === 'error' ? 'bg-danger text-white' : 'bg-success text-white'}`;
+                toast.show();
+            } else {
+                // Fallback si los elementos toast no están disponibles
+                console.log(`${type === 'error' ? 'Error' : 'Éxito'}: ${title} - ${message}`);
+                alert(`${title}: ${message}`);
+            }
+        }
+
+        // Función para mostrar/ocultar loading
+        function toggleLoading(show) {
+            if (loadingElement) {
+                loadingElement.style.display = show ? 'flex' : 'none';
+            }
+        }
+
+        // Función para cargar los contactos
+        async function loadContacts() {
+            try {
+                toggleLoading(true);
+                
+                // Reinicializar elementos del DOM para asegurarnos que están disponibles
+                if (!contactsTableBody || !noContactsMessage) {
+                    initDOMElements();
+                }
+                
+                if (!contactsTableBody) {
+                    console.error("No se pudo encontrar el elemento contactsTableBody");
+                    return;
+                }
+                
+                const response = await fetch(`${API_URL}/contacts/`);
+                if (!response.ok) {
+                    throw new Error('Error al cargar los contactos');
+                }
+                
+                const contacts = await response.json();
+                
+                contactsTableBody.innerHTML = '';
+                
+                if (contacts.length === 0) {
+                    if (noContactsMessage) {
+                        noContactsMessage.style.display = 'block';
+                    }
+                } else {
+                    if (noContactsMessage) {
+                        noContactsMessage.style.display = 'none';
+                    }
+                    
+                    contacts.forEach(contact => {
+                        const row = document.createElement('tr');
+                        
+                        // Formatear fecha de nacimiento
+                        const fechaNacimiento = new Date(contact.fecha_nacimiento);
+                        const fechaFormateada = fechaNacimiento.toLocaleDateString();
+                        
+                        // Verificar que la dirección exista antes de mostrarla
+                        const direccion = contact.direccion || '';
+                        
+                        row.innerHTML = `
+                            <td>${contact.nombre || ''}</td>
+                            <td>${contact.apellidos || ''}</td>
+                            <td>${contact.correo || ''}</td>
+                            <td>${contact.celular || ''}</td>
+                            <td>${fechaFormateada}</td>
+                            <td>${contact.genero || ''}</td>
+                            <td>${direccion}</td>
+                            <td>
+                                <button class="btn btn-sm btn-success export-btn" data-id="${contact.id}">vCard</button>
+                                <button class="btn btn-sm btn-danger delete-btn" data-id="${contact.id}">Eliminar</button>
+                            </td>
+                        `;
+                        
+                        contactsTableBody.appendChild(row);
+                    });
+                    
+                    // Agregar event listeners a los botones de acciones
+                    document.querySelectorAll('.export-btn').forEach(btn => {
+                        btn.addEventListener('click', exportContact);
+                    });
+                    
+                    document.querySelectorAll('.delete-btn').forEach(btn => {
+                        btn.addEventListener('click', showDeleteConfirmation);
+                    });
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Error', error.message, 'error');
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        // Función para registrar un nuevo contacto
+        async function registerContact(event) {
+            event.preventDefault();
+            
+            // Validación del formulario
+            if (!contactForm.checkValidity()) {
+                event.stopPropagation();
+                contactForm.classList.add('was-validated');
+                return;
+            }
+            
+            const formData = new FormData(contactForm);
+            const contactData = {
+                nombre: formData.get('nombre'),
+                apellidos: formData.get('apellidos'),
+                correo: formData.get('correo'),
+                celular: formData.get('celular'),
+                fecha_nacimiento: formData.get('fecha_nacimiento'),
+                genero: formData.get('genero'),
+                direccion: formData.get('direccion')
+            };
+            
+            try {
+                toggleLoading(true);
+                
+                const response = await fetch(`${API_URL}/contacts/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(contactData)
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Error al registrar el contacto');
+                }
+                
+                const result = await response.json();
+                
+                // Limpiar formulario
+                contactForm.reset();
+                contactForm.classList.remove('was-validated');
+                
+                showNotification('Éxito', 'Contacto registrado correctamente');
+                
+                // Cambiar a la pestaña de contactos y actualizar la lista
+                document.getElementById('contacts-tab').click();
+                await loadContacts();
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Error', error.message, 'error');
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        // Función para exportar un contacto como vCard
+        async function exportContact(event) {
+            const contactId = event.target.dataset.id;
+            
+            try {
+                toggleLoading(true);
+                
+                const response = await fetch(`${API_URL}/contacts/${contactId}/vcard`);
+                
+                if (!response.ok) {
+                    throw new Error('Error al exportar el contacto');
+                }
+                
+                const result = await response.json();
+                
+                // Crear y descargar el archivo vCard
+                const blob = new Blob([result.vcard], { type: 'text/vcard' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'contacto.vcf';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showNotification('Éxito', 'Contacto exportado correctamente');
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Error', error.message, 'error');
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        // Función para exportar todos los contactos como vCard
+        async function exportAllContacts() {
+            try {
+                toggleLoading(true);
+                
+                const response = await fetch(`${API_URL}/export/vcard`);
+                
+                if (!response.ok) {
+                    throw new Error('Error al exportar los contactos');
+                }
+                
+                const result = await response.json();
+                
+                // Crear y descargar el archivo vCard
+                const blob = new Blob([result.vcard], { type: 'text/vcard' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'contactos.vcf';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showNotification('Éxito', 'Contactos exportados correctamente');
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Error', error.message, 'error');
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        // Función para mostrar confirmación de eliminación
+        function showDeleteConfirmation(event) {
+            currentContactId = event.target.dataset.id;
+            deleteModal.show();
+        }
+
+        // Función para eliminar un contacto
+        async function deleteContact() {
+            if (!currentContactId) return;
+            
+            try {
+                toggleLoading(true);
+                deleteModal.hide();
+                
+                const response = await fetch(`${API_URL}/contacts/${currentContactId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Error al eliminar el contacto');
+                }
+                
+                showNotification('Éxito', 'Contacto eliminado correctamente');
+                
+                // Actualizar la lista de contactos
+                await loadContacts();
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Error', error.message, 'error');
+            } finally {
+                toggleLoading(false);
+                currentContactId = null;
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inicializar elementos del DOM
+            initDOMElements();
+            
+            // Verificar que todos los elementos del DOM existan
+            if (document.getElementById('contacts-tab')) {
+                // Manejar cambio de pestañas
+                document.getElementById('contacts-tab').addEventListener('click', loadContacts);
+            }
+            
+            // Registro de contacto
+            if (contactForm) {
+                contactForm.addEventListener('submit', registerContact);
+            }
+            
+            // Refresh de contactos
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', loadContacts);
+            }
+            
+            // Exportar todos los contactos
+            if (exportAllBtn) {
+                exportAllBtn.addEventListener('click', exportAllContacts);
+            }
+            
+            // Confirmar eliminación
+            if (confirmDeleteBtn) {
+                confirmDeleteBtn.addEventListener('click', deleteContact);
+            }
+        });
+    </script>
 </body>
 </html>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
