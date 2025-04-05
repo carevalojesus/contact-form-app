@@ -1,2 +1,4 @@
 # ignorar carpeta venv
 venv
+
+__pycache__/
